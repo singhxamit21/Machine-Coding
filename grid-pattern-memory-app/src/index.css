@@ -1,0 +1,15 @@
+.container{
+    display: grid;
+    width: 16rem;
+    grid-template-columns: repeat(3,1fr);
+}
+
+.cell{
+    width: 5rem;
+    height: 5rem;
+    border: 1px solid black;
+}
+
+.active {
+    background-color: aquamarine;
+}
