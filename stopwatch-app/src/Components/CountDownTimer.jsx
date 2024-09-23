@@ -10,6 +10,7 @@ const CountDownTimer = () => {
     const intervalRef = useRef(null);
     const handleChange = (e, field) => {
         const value = parseInt(e.target.value, 10) || 0;
+        // const value = +e.target.value || 0;
 
         const copyTime = { ...time };
         copyTime[field] = value;
