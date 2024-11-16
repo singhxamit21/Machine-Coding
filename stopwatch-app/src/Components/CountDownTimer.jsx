@@ -44,7 +44,7 @@ const CountDownTimer = () => {
     };
     useEffect(() => {
         if (isRunning) {
-            intervalRef.current = setInterval(() => {
+            intervalRef.current =  (() => {
                 setTime((prevTime) => {
                     const copyPrevTime = { ...prevTime };
                     copyPrevTime.second--;
