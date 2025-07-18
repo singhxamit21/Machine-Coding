@@ -1,35 +1,42 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 export default function Post({ data, setPageNo }) {
+  const lastImageRef = useRef(null);
+
   useEffect(() => {
+    if (!lastImageRef.current) return;
+
     const observer = new IntersectionObserver(
-      (param) => {
-        if (param[0].isIntersecting) {
-          observer.unobserve(lastImage);
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          observer.unobserve(lastImageRef.current);
           setPageNo((pageNo) => pageNo + 1);
         }
       },
       { threshold: 0.5 }
     );
 
-    const lastImage = document.querySelector(".image-post:last-child");
-    if (!lastImage) {
-      return;
-    }
-    observer.observe(lastImage);
+    observer.observe(lastImageRef.current);
 
     return () => {
-      if (lastImage) {
-        observer.unobserve(lastImage);
+      if (lastImageRef.current) {
+        observer.unobserve(lastImageRef.current);
       }
       observer.disconnect();
     };
   }, [data]);
+
   return (
     <div className="container">
       {data.map((item, index) => {
+        const isLast = index === data.length - 1;
         return (
-          <img className="image-post" key={item.id} src={item.download_url} />
+          <img
+            ref={isLast ? lastImageRef : null}
+            className="image-post"
+            key={item.id}
+            src={item.download_url}
+          />
         );
       })}
     </div>
