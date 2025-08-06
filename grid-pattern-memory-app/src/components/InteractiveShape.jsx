@@ -1,58 +1,65 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 
 const InteractiveShape = () => {
-    const [grid, setGrid] = useState(Array.from({ length: 3 }, () => new Array(3).fill(false)))
+    const [grid, setGrid] = useState(Array.from({ length: 3 }, () => Array(3).fill(false)));
+    const [clickQueue, setClickQueue] = useState([]);
+    const [timerIds, setTimerIds] = useState([]);
 
-    const queue = useRef([])
-    const timerId = useRef([])
+    const handleOnClick = (rowIdx, colIdx) => {
+        if (timerIds.length > 0) return;
+        if (grid[rowIdx][colIdx]) return;
 
-    const handleOnClick = (rowIdx, colIdx, flag) => {
-        console.log(timerId.current,flag,"sss")
-        if(timerId.current.length > 0 && flag){
-            return;
-        }
-        if(grid[rowIdx][colIdx] && flag){
-            return;
-        }
-        if (flag) {
-            queue.current.push([rowIdx, colIdx])
-        }
+
+        setClickQueue((prev) => [...prev, [rowIdx, colIdx]]);
+
+
         setGrid((prevGrid) => {
-            const gridDeepCopy = prevGrid.map((row) => [...row]);
-            gridDeepCopy[rowIdx][colIdx] = flag
-            return gridDeepCopy;
-        })
-        
-    }
-    useEffect(() => {
-        if (queue.current.length === 9) {
-            queue.current.forEach(([rowIdx, colIdx], idx) => {
-                timerId.current[idx] = setTimeout(() => {
-                    handleOnClick(rowIdx, colIdx, false);
-                    if(idx === timerId.current.length - 1){
-                        timerId.current = [];
-                    }
-                }
-                    , 1000 * (idx + 1))
-            })
-            queue.current = [];
-        }
-    }, [grid])
+            const updated = prevGrid.map((row) => [...row]);
+            updated[rowIdx][colIdx] = true;
+            return updated;
+        });
+    };
 
-    useEffect(()=>{
-        return ()=>{
-            timerId.current.forEach((id)=>clearTimeout(id))
+    useEffect(() => {
+        if (clickQueue.length === 9) {
+            const timers = clickQueue.map(([rowIdx, colIdx], idx) => {
+                return setTimeout(() => {
+                    setGrid((prevGrid) => {
+                        const updated = prevGrid.map((row) => [...row]);
+                        updated[rowIdx][colIdx] = false;
+                        return updated;
+                    });
+
+                    if (idx === clickQueue.length - 1) {
+                        setTimerIds([]);
+                    }
+                }, 1000 * (idx + 1));
+            });
+
+            setTimerIds(timers);
+            setClickQueue([]);
         }
-    },[])
+    }, [clickQueue]);
+
+    useEffect(() => {
+        return () => {
+            timerIds.forEach((id) => clearTimeout(id));
+        };
+    }, [timerIds]);
+
     return (
         <div className='container'>
-            {grid.map((row, rowIdx) => {
-                return row.map((cell, colIdx) => {
-                    return <div className={`cell ${cell ? "active" : ""}`} key={`${rowIdx}-${colIdx}`} onClick={() => handleOnClick(rowIdx, colIdx, true)}></div>
-                })
-            })}
+            {grid.map((row, rowIdx) =>
+                row.map((cell, colIdx) => (
+                    <div
+                        className={`cell ${cell ? 'active' : ''}`}
+                        key={`${rowIdx}-${colIdx}`}
+                        onClick={() => handleOnClick(rowIdx, colIdx)}
+                    />
+                ))
+            )}
         </div>
-    )
-}
+    );
+};
 
-export default InteractiveShape
+export default InteractiveShape;
